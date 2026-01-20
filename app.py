@@ -3,20 +3,28 @@ import pickle
 import nltk
 from utils import preprocess_text
 
-# Download NLTK resources (runs once on cloud)
-nltk.download('stopwords')
-nltk.download('wordnet')
+# ---- Safe NLTK downloads for Streamlit Cloud ----
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords')
 
-# Load model and vectorizer
+try:
+    nltk.data.find('corpora/wordnet')
+except LookupError:
+    nltk.download('wordnet')
+
+# ---- Load model and vectorizer ----
 try:
     with open('fake_news_model.pkl', 'rb') as f:
         model = pickle.load(f)
     with open('tfidf_vectorizer.pkl', 'rb') as f:
         tfidf = pickle.load(f)
-except FileNotFoundError:
-    st.error("Model files not found. Please train and save the model first.")
+except Exception as e:
+    st.error(f"Error loading model files: {e}")
     st.stop()
 
+# ---- UI ----
 st.title("Fake News Detection")
 st.write("Enter news text to predict if it's fake or real.")
 
